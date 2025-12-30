@@ -209,3 +209,12 @@ Forensic & Novel Features
 npx hardhat compile
 
 npx hardhat run scripts/deploy.js --network localhost
+
+
+  Contract deployment: SentinelChain
+  Contract address:    0x5fbdb2315678afecb367f032d93f642f64180aa3
+  Transaction:         0xa88d9587ef0f00a0c0eb43dca7d717b5c7acef86b85bffc389d46aa15f9c81f4
+  From:                0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266
+  Value:               0 ETH 
+  Gas used:            1288960 of 16777216
+  Block #1:            0x432076b7355b3ad466d95b89ef3c6383e8e53e635c9091838f34a8a6af784e53
