@@ -4,8 +4,8 @@ import { getProvider } from "./provider";
 const ABI = [
   "function getLog(string) view returns (string,uint256,uint8,bytes32,string)",
   "function verifyLog(string,string) view returns (bool)",
-  "event AlertTriggered(string,string,uint8,uint256)",
-  "event CriticalAlert(string,string,uint256)"
+  "event AlertTriggered(string indexed logId, string agentId, uint8 alertLevel, uint256 timestamp)",
+  "event CriticalAlert(string indexed logId, string keyword, uint256 timestamp)"
 ];
 
 const ADDRESS = "0x5fbdb2315678afecb367f032d93f642f64180aa3";

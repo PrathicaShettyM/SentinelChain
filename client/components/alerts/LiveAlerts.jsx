@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { ethers } from "ethers";
 import { getContract } from "../../blockchain/contract";
 
 export default function LiveAlerts() {
@@ -7,45 +8,103 @@ export default function LiveAlerts() {
   useEffect(() => {
     let contract;
 
-    getContract().then(c => {
-      contract = c;
+    async function init() {
+      contract = await getContract();
 
-      c.on("AlertTriggered", (id, agent, level) => {
-        setAlerts(a => [...a, { id, agent, level }]);
+      /* -------------------------------
+         1️⃣ LOAD PAST EVENTS
+      -------------------------------- */
+
+      const pastAlerts = await contract.queryFilter("AlertTriggered");
+      const pastCritical = await contract.queryFilter("CriticalAlert");
+
+      const formatted = [
+        ...pastAlerts
+          .filter(e => e.args)
+          .map(e => ({
+            type: "alert",
+            logId: e.args.logId ?? e.args[0],
+            agentId: e.args.agentId ?? e.args[1],
+            level: Number(e.args.alertLevel ?? e.args[2]),
+            timestamp: Number(e.args.timestamp ?? e.args[3])
+          })),
+
+        ...pastCritical
+          .filter(e => e.args)
+          .map(e => ({
+            type: "critical",
+            // indexed string → HASH ONLY
+            logId: ethers.hexlify(e.topics[1]),
+            keyword: e.args.keyword ?? e.args[1],
+            timestamp: Number(e.args.timestamp ?? e.args[2])
+          }))
+      ];
+
+      setAlerts(formatted);
+
+      /* -------------------------------
+         2️⃣ REAL-TIME LISTENERS
+      -------------------------------- */
+
+      contract.on("AlertTriggered", (logId, agentId, level, timestamp) => {
+        setAlerts(a => [
+          {
+            type: "alert",
+            logId,
+            agentId,
+            level: Number(level),
+            timestamp: Number(timestamp)
+          },
+          ...a
+        ]);
       });
 
-      c.on("CriticalAlert", (id) => {
-        setAlerts(a => [...a, { id, critical: true }]);
+      contract.on("CriticalAlert", (logIdHash, keyword, timestamp, event) => {
+        setAlerts(a => [
+          {
+            type: "critical",
+            // topic[1] = keccak256(logId)
+            logId: ethers.hexlify(event.topics[1]),
+            keyword,
+            timestamp: Number(timestamp)
+          },
+          ...a
+        ]);
       });
-    });
+    }
 
-    return () => contract?.removeAllListeners();
+    init();
+
+    return () => {
+      contract?.removeAllListeners();
+    };
   }, []);
 
-  return (
-    <div className="space-y-2 text-sm">
-      {alerts.length === 0 && (
-        <p className="text-slate-500">No alerts yet</p>
-      )}
+  /* -------------------------------
+     UI
+  -------------------------------- */
 
+  return (
+    <div className="space-y-2">
       {alerts.map((a, i) => (
         <div
           key={i}
-          className={`
-            flex items-center gap-2 px-3 py-2 rounded-md border
-            ${
-              a.critical
-                ? "bg-red-950 border-red-800 text-red-400"
-                : "bg-amber-950 border-amber-800 text-amber-400"
-            }
-          `}
+          className={`p-2 rounded text-sm ${
+            a.type === "critical"
+              ? "bg-red-900 text-red-300"
+              : "bg-yellow-900 text-yellow-300"
+          }`}
         >
-          <span className="font-semibold">
-            {a.critical ? "🔥 CRITICAL" : "⚠️ ALERT"}
-          </span>
-          <span className="font-mono text-xs text-slate-200">
-            {a.id}
-          </span>
+          {a.type === "critical" ? (
+            <>
+              🔥 <b>CRITICAL ATTACK</b><br />
+              <span className="text-xs break-all">
+                LogHash: {a.logId}
+              </span>
+            </>
+          ) : (
+            `⚠️ Alert L${a.level} — Agent ${a.agentId}`
+          )}
         </div>
       ))}
     </div>

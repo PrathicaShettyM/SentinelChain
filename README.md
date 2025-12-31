@@ -222,3 +222,18 @@ npx hardhat run scripts/deploy.js --network localhost
 
 stage 1
 ![alt text](image.png)
+
+
+GOAL OF ALERTS PAGE
+
+You want:
+
+Live security alerts
+
+Real-time updates
+
+No backend polling
+
+Chain-based truth
+
+This is exactly what Ethereum events are for.
