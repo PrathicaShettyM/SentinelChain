@@ -218,3 +218,7 @@ npx hardhat run scripts/deploy.js --network localhost
   Value:               0 ETH 
   Gas used:            1288960 of 16777216
   Block #1:            0x432076b7355b3ad466d95b89ef3c6383e8e53e635c9091838f34a8a6af784e53
+
+
+stage 1
+![alt text](image.png)

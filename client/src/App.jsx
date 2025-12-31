@@ -102,7 +102,7 @@ function LogLookup() {
 
       setLogId(id);
       console.log("Searching logId:", id);
-      
+
       setLog({
         agentId: res[0],
         timestamp: new Date(Number(res[1]) * 1000).toLocaleString(),
@@ -115,15 +115,15 @@ function LogLookup() {
     }
   };
 
-  const verifyLog = async (hashedLog) => {
-    try {
-      const contract = await getContract();
-      const isValid = await contract.verifyLog(logId, hashedLog);
-      setVerifyResult(isValid);
-    } catch {
-      setVerifyResult(false);
-    }
-  };
+const verifyLog = async (rawLog) => {
+  try {
+    const contract = await getContract();
+    const isValid = await contract.verifyLog(logId, rawLog);
+    setVerifyResult(isValid);
+  } catch {
+    setVerifyResult(false);
+  }
+};
 
   return (
     <>
