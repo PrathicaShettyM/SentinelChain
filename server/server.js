@@ -2,9 +2,11 @@ import 'dotenv/config';
 import express, { json } from "express";
 import { createHash } from "crypto";
 import { ethers } from "ethers";
+import cors from "cors";
 
 const app = express();
 app.use(json());
+app.use(cors());
 
 // ------------------ ETHERS SETUP ------------------
 const provider = new ethers.JsonRpcProvider(process.env.RPC_URL);
